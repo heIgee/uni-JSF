@@ -1,0 +1,9 @@
+{
+  "name": "2",
+  "main": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "tsx": "^4.17.0"
+  }
+}
