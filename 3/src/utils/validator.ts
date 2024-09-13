@@ -1,26 +1,28 @@
 export class Validator {
   validateBook(formData: FormData): boolean {
-    console.log(formData);
-
     const bookName = formData.get('name');
     const author = formData.get('author');
     const releaseYear = formData.get('year');
 
-    console.log({ bookName, author, releaseYear });
-    // modal ??
-    return !!bookName && !!author && !!releaseYear;
+    return (
+      !!bookName &&
+      !!author &&
+      !!releaseYear &&
+      this.isYearValid(releaseYear as string)
+    );
   }
 
   validateUser(formData: FormData): boolean {
-    console.log(formData);
-
     const userName = formData.get('name');
     const email = formData.get('email');
     const birthYear = formData.get('year');
 
-    console.log({ userName, email, birthYear });
-    // modal ??
-    return !!userName && !!email && !!birthYear;
+    return (
+      !!userName &&
+      !!email &&
+      !!birthYear &&
+      this.isYearValid(birthYear as string)
+    );
   }
 
   isYearValid(year: string): boolean {

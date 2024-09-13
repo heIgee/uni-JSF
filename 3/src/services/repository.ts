@@ -1,4 +1,4 @@
-import { IEntity } from './models';
+import { IEntity } from '../types/index';
 
 export class Repository<T extends IEntity> {
   private items: T[];

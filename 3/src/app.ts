@@ -1,34 +1,13 @@
-import { Events } from './events';
-import globalEmitter from './globalEmitter';
-import { IBook, IUser } from './models';
-import { Repository } from './repository';
-import { LibraryService, RegistryService } from './services';
-import { AppStorage } from './storage';
-import { Validator } from './validator';
-
-const defaultBooks: IBook[] = [
-  {
-    id: crypto.randomUUID(),
-    name: 'The Catcher in the Rye',
-    author: 'J.D. Salinger',
-    releaseYear: 1951,
-    isBorrowed: false,
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    releaseYear: 1960,
-    isBorrowed: false,
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '1984',
-    author: 'George Orwell',
-    releaseYear: 1949,
-    isBorrowed: true,
-  },
-];
+import { defaultBooks, defaultUsers } from './config/defaults';
+import { globalEmitter } from './events/globalEmitter';
+import { Events } from './events/events';
+import { LibraryService } from './services/libraryService';
+import { RegistryService } from './services/registryService';
+import { Repository } from './services/repository';
+import { IBook, IUser } from './types/index';
+import { Modal } from './ui/modal';
+import { AppStorage } from './utils/storage';
+import { Validator } from './utils/validator';
 
 class App {
   readonly libraryService: LibraryService;
@@ -40,7 +19,6 @@ class App {
     document.querySelector('#addBookForm')!;
   readonly addUserForm: HTMLFormElement =
     document.querySelector('#addUserForm')!;
-
   readonly bookList: HTMLFormElement = document.querySelector('#bookList')!;
   readonly userList: HTMLFormElement = document.querySelector('#userList')!;
 
@@ -49,7 +27,7 @@ class App {
       new Repository<IBook>(this.storage.retrieveBooks() ?? defaultBooks),
     );
     this.registryService = new RegistryService(
-      new Repository<IUser>(this.storage.retrieveUsers() ?? []),
+      new Repository<IUser>(this.storage.retrieveUsers() ?? defaultUsers),
     );
     this.setupFormListeners();
     this.setupEvents();
@@ -58,16 +36,15 @@ class App {
   private setupFormListeners(): void {
     this.addBookForm.addEventListener('submit', (ev) => {
       ev.preventDefault();
-      this.handleFormSubmission(ev.target, 'book');
+      this.handleFormSubmission(ev.target as HTMLFormElement, 'book');
     });
     this.addUserForm.addEventListener('submit', (ev) => {
       ev.preventDefault();
-      this.handleFormSubmission(ev.target, 'user');
+      this.handleFormSubmission(ev.target as HTMLFormElement, 'user');
     });
   }
 
   private setupEvents(): void {
-    // this.renderBooks = this.renderBooks.bind(this); // or an arrow callback
     globalEmitter.on(Events.BooksShouldRender, () =>
       this.renderBooks(this.libraryService.getAllBooks()),
     );
@@ -85,10 +62,9 @@ class App {
   }
 
   private handleFormSubmission(
-    form: EventTarget | null,
+    form: HTMLFormElement,
     formType: 'book' | 'user',
   ): void {
-    if (!(form instanceof HTMLFormElement)) return;
     if (!form.checkValidity()) {
       form.classList.add('was-validated');
     } else {
@@ -96,16 +72,11 @@ class App {
       switch (formType) {
         case 'book':
           if (this.validator.validateBook(formData)) {
-            const name = formData.get('name') as string;
-            const author = formData.get('author') as string;
-            const releaseYearStr = formData.get('year') as string;
-            const releaseYear = parseInt(releaseYearStr, 10);
-
             const book: IBook = {
               id: crypto.randomUUID(),
-              name,
-              author,
-              releaseYear,
+              name: formData.get('name') as string,
+              author: formData.get('author') as string,
+              releaseYear: parseInt(formData.get('year') as string, 10),
               isBorrowed: false,
             };
             this.libraryService.addBook(book);
@@ -113,22 +84,19 @@ class App {
           break;
         case 'user':
           if (this.validator.validateUser(formData)) {
-            const name = formData.get('name') as string;
-            const email = formData.get('email') as string;
-            const birthYearStr = formData.get('year') as string;
-            const birthYear = parseInt(birthYearStr, 10);
-
             const user: IUser = {
               id: crypto.randomUUID(),
-              name,
-              email,
-              birthYear,
-              borrowedBookIds: new Set<string>(),
+              name: formData.get('name') as string,
+              email: formData.get('email') as string,
+              birthYear: parseInt(formData.get('year') as string, 10),
+              borrowedBookIds: [],
             };
             this.registryService.addUser(user);
           }
           break;
       }
+      form.reset();
+      form.classList.remove('was-validated');
     }
   }
 
@@ -150,15 +118,34 @@ class App {
       toggleButton.className = 'btn py-1 me-2';
       toggleButton.classList.add(book.isBorrowed ? 'btn-warning' : 'btn-info');
       toggleButton.textContent = book.isBorrowed ? 'Return' : 'Borrow';
+
       toggleButton.onclick = () => {
-        this.libraryService.toggleBook(book.id);
+        if (book.isBorrowed) {
+          this.handleReturnBook(book);
+        } else {
+          this.showBorrowModal(book);
+        }
       };
+
       buttonContainer.append(toggleButton);
 
       const deleteButton = document.createElement('button');
       deleteButton.className = 'btn btn-outline-danger py-1';
       deleteButton.textContent = '❌';
-      deleteButton.onclick = () => this.libraryService.deleteBook(book.id);
+      deleteButton.onclick = () => {
+        this.libraryService.deleteBook(book.id);
+        const user = this.registryService
+          .getAllUsers()
+          .find((user) => user.borrowedBookIds.includes(book.id));
+        user &&
+          this.registryService.updateUser(user.id, {
+            ...user,
+            borrowedBookIds: user.borrowedBookIds.filter(
+              (id) => id !== book.id,
+            ),
+          });
+        console.log(this.registryService.getAllUsers());
+      };
       buttonContainer.append(deleteButton);
 
       container.append(buttonContainer);
@@ -167,8 +154,6 @@ class App {
   }
 
   renderUsers(users: IUser[]): void {
-    console.log('RENDER', this.registryService.getAllUsers());
-
     this.userList.innerHTML = '';
     users.forEach((user) => {
       const container = document.createElement('div');
@@ -177,7 +162,7 @@ class App {
 
       const text = document.createElement('p');
       text.className = 'my-1 me-2';
-      text.textContent = `${user.name} ${user.email} (born ${user.birthYear})`;
+      text.textContent = `${user.name} ${user.email} (born ${user.birthYear}) [${user.id}]`;
       container.append(text);
 
       const deleteButton = document.createElement('button');
@@ -188,6 +173,52 @@ class App {
 
       this.userList.append(container);
     });
+  }
+
+  private showBorrowModal(book: IBook): void {
+    const modal = Modal.showBorrowModal(book, (userId) => {
+      if (!userId) {
+        Modal.showErrorModal('Invalid Input', 'Please enter a valid User ID.');
+        return;
+      }
+
+      const user = this.registryService.findUserById(userId);
+      if (!user) {
+        Modal.showErrorModal(
+          'User Not Found',
+          `No user found with ID ${userId}.`,
+        );
+      } else if (user.borrowedBookIds.length >= 3) {
+        Modal.showErrorModal(
+          'Borrow Limit Reached',
+          'This user has already borrowed 3 books, which is the maximum allowed.',
+        );
+      } else {
+        this.libraryService.toggleBook(book.id);
+        this.registryService.toggleBorrowBook(user.id, book.id);
+        modal.hide();
+        Modal.showSuccessModal(
+          'Book Borrowed',
+          `"${book.name}" has been successfully borrowed by ${user.name}.`,
+        );
+      }
+    });
+
+    modal.show();
+  }
+
+  private handleReturnBook(book: IBook): void {
+    const user = this.registryService
+      .getAllUsers()
+      .find((user) => user.borrowedBookIds.includes(book.id));
+    if (user) {
+      this.registryService.toggleBorrowBook(user.id, book.id);
+    }
+    this.libraryService.toggleBook(book.id);
+    Modal.showSuccessModal(
+      'Book Returned',
+      `"${book.name}" has been successfully returned.`,
+    );
   }
 }
 

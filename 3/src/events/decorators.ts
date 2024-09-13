@@ -1,4 +1,4 @@
-import globalEmitter from './globalEmitter';
+import { globalEmitter } from './globalEmitter';
 
 export function emit(event: string) {
   return function (

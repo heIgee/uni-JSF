@@ -1,4 +1,4 @@
-import { IBook, IUser } from './models';
+import { IBook, IUser } from '../types/index';
 
 export class AppStorage {
   retrieveBooks(): IBook[] | null {

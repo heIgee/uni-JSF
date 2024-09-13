@@ -13,5 +13,5 @@ export interface IUser extends IEntity {
   name: string;
   email: string;
   birthYear: number;
-  borrowedBookIds: Set<string>;
+  borrowedBookIds: string[];
 }
