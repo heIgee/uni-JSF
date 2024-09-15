@@ -5,7 +5,8 @@
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve --open",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -14,6 +15,7 @@
   "private": true,
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
+    "husky": "^9.1.6",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "webpack": "^5.94.0",
