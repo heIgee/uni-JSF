@@ -5,7 +5,9 @@
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve --open",
+    "lint": "eslint . --ext ts,tsx",
+    "prettier": "prettier --write \"**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -14,6 +16,12 @@
   "private": true,
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "webpack": "^5.94.0",
