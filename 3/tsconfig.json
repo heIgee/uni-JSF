@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
     "lib": ["ESNext", "DOM"],
     "removeComments": true,
     "strict": true,
@@ -12,9 +13,12 @@
     "experimentalDecorators": true,
   },
   "include": [
-    "src"
+    "test/**/*.ts", "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
+  "ts-node": {
+    "esm": true
+  }
 }
