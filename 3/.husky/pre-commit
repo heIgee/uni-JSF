@@ -1,0 +1,2 @@
+echo 'Woof!'
+npm run lint && npm test

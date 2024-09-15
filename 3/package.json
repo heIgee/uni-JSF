@@ -1,11 +1,16 @@
 {
   "name": "lab-app",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve --open",
+    "lint": "eslint . --ext ts,tsx",
+    "prettier": "prettier --write \"**/*.ts\"",
+    "test": "mocha --config mocha.config.cjs",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -14,7 +19,20 @@
   "private": true,
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "@types/chai": "^4.3.19",
+    "@types/mocha": "^10.0.8",
+    "@types/node": "^22.5.5",
+    "chai": "^5.1.1",
+    "mocha": "^10.7.3",
+    "husky": "^9.1.6",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
