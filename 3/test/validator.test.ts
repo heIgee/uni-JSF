@@ -74,5 +74,9 @@ describe('Validator', () => {
     it('should invalidate a non-numeric year', () => {
       expect(validator.isYearValid('abcd')).to.be.false;
     });
+
+    it('should invalidate a future year', () => {
+      expect(validator.isYearValid('2025')).to.be.false;
+    });
   });
 });

@@ -27,6 +27,8 @@ export class Validator {
 
   isYearValid(year: string): boolean {
     const yearRegex = /^\d{4}$/;
-    return yearRegex.test(year);
+    return yearRegex.test(
+      year,
+    ) /* && Number(year) <= new Date().getFullYear() */;
   }
 }

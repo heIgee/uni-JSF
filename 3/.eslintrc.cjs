@@ -8,10 +8,10 @@ module.exports = {
     'prettier',
     'plugin:prettier/recommended',
   ],
+  ignorePatterns: ['.eslintrc.cjs'],
   plugins: ['@typescript-eslint', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
-    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
   },
 };

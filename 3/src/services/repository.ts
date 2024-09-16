@@ -24,13 +24,13 @@ export class Repository<T extends IEntity> {
   }
 
   update(id: string, updatedItem: T): void {
-    const index = this.items.findIndex((item: any) => item.id === id);
+    const index = this.items.findIndex((item: T) => item.id === id);
     if (index !== -1) {
       this.items[index] = updatedItem;
     }
   }
 
   delete(id: string): void {
-    this.items = this.items.filter((item: any) => item.id !== id);
+    this.items = this.items.filter((item: T) => item.id !== id);
   }
 }
