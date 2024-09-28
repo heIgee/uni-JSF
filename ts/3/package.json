@@ -9,7 +9,7 @@
     "start": "webpack serve --open",
     "lint": "eslint . --ext ts,tsx",
     "prettier": "prettier --write \"**/*.ts\"",
-    "test": "mocha --config mocha.config.cjs",
+    "test": "mocha --config mocha.git config --get core.hooksPathonfig.cjs",
     "prepare": "husky"
   },
   "repository": {
