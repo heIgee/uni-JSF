@@ -2,16 +2,18 @@
 import { ref } from 'vue';
 import RegisterForm from './components/RegisterForm.vue';
 import WinnersBlock from './components/WinnersBlock.vue';
-import type { User } from './models/user.model';
-import type { CreateUserDto } from './models/create-user-dto.model';
+import type { Participant } from './models/participant.model';
+import type { CreateParticipantDto } from './models/create-participant.dto.ts';
 import ParticipantList from './components/ParticipantList.vue';
 
-const newUser = ref<User>();
-function register(data: CreateUserDto) {
-  newUser.value = {
+const maxWinners = 3;
+
+const participants = ref<Participant[]>([]);
+function register(data: CreateParticipantDto) {
+  participants.value.push({
     id: crypto.randomUUID(),
     ...data,
-  };
+  });
 }
 </script>
 
@@ -26,15 +28,15 @@ function register(data: CreateUserDto) {
 
       <main class="gap-8 grid grid-cols-1 md:grid-cols-2">
         <div>
-          <WinnersBlock class="mb-8" />
           <RegisterForm @submit="register" />
         </div>
         <div>
-          <ParticipantList />
-          <div class="bg-gray-800 mt-4 p-4 rounded">
-            <h2 class="mb-2 font-semibold text-xl">Debug Info</h2>
-            <p class="text-gray-300">New User: {{ newUser }}</p>
-          </div>
+          <WinnersBlock
+            :participants="participants"
+            :max-winners="maxWinners"
+            class="mb-8"
+          />
+          <ParticipantList :participants="participants" />
         </div>
       </main>
     </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { CreateUserDto } from '@/models/create-user-dto.model';
+import type { CreateParticipantDto } from '@/models/create-participant.dto';
 import { ref, computed } from 'vue';
 
-const data = ref<CreateUserDto>({
+const data = ref<CreateParticipantDto>({
   name: '',
   birthDate: '',
   email: '',
@@ -10,7 +10,7 @@ const data = ref<CreateUserDto>({
 });
 
 const emit = defineEmits<{
-  submit: [data: CreateUserDto];
+  submit: [data: CreateParticipantDto];
 }>();
 
 const errors = computed(() => ({
@@ -18,7 +18,7 @@ const errors = computed(() => ({
   birthDate:
     !data.value.birthDate || new Date(data.value.birthDate) >= new Date(),
   email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.value.email),
-  phoneNumber: !data.value.phoneNumber.trim(),
+  phoneNumber: !/^\+?[1-9]\d{1,14}$/.test(data.value.phoneNumber),
 }));
 
 const isDirty = ref(false);
@@ -26,14 +26,21 @@ const isValid = computed(() => !Object.values(errors.value).some(Boolean));
 
 function submit() {
   isDirty.value = true;
+
   if (isValid.value) {
     emit('submit', data.value);
+    (Object.keys(data.value) as (keyof CreateParticipantDto)[]).forEach(
+      (prop) => {
+        data.value[prop] = '';
+      },
+    );
+    isDirty.value = false;
   }
 }
 </script>
 
 <template>
-  <section class="mx-auto mt-8 max-w-md">
+  <section class="mx-auto mt-6 max-w-md">
     <h2 class="mb-4 font-bold text-2xl">Register form</h2>
     <p class="mb-4">Please fill in all the fields</p>
     <form @submit.prevent="submit" class="space-y-3">
